@@ -26,10 +26,7 @@ app.get("/notes", function (req, res) {
 });
 
 app.get("/api/notes", function (req, res) {
-    // Get content from file
-    let contents = fs.readFileSync(path.join(__dirname, "db", "db.json"));
-    // Define to JSON type
-    var jsonContent = JSON.parse(contents);
+    let jsonContent = getJSONData();
     return res.json(jsonContent);
     // res.sendFile(path.join(__dirname, "db", "db.json"));
 });
@@ -38,15 +35,30 @@ app.get("/api/notes", function (req, res) {
 app.post("/api/notes", function (req, res) {
     // req.body hosts is equal to the JSON post sent from the user
     // This works because of our body parsing middleware
-    var newNote = req.body;
+    let newNote = req.body;
     console.log(newNote);
-    let contents = fs.readFileSync(path.join(__dirname, "db", "db.json"));
-    // Define to JSON type
-    var jsonContent = JSON.parse(contents);
+    let jsonContent = getJSONData();
     jsonContent.push(newNote);
     fs.writeFileSync(path.join(__dirname, "db", "db.json"), JSON.stringify(jsonContent));
     res.json(jsonContent);
 });
+
+// DELETE implementation
+app.delete("/api/notes/:id",
+    function (req, res) {
+        console.log("Deleting id:" + req.params.id);
+        let jsonContent = getJSONData();
+        let updatedJSON = jsonContent.filter(function (definition) {
+            return definition.id.toLowerCase() !== req.params.id.toLowerCase();
+        });
+        fs.writeFileSync(path.join(__dirname, "db", "db.json"), JSON.stringify(updatedJSON));
+        res.json(updatedJSON); //sending the updated response back to client app.
+    });
+
+function getJSONData() {
+    let contents = fs.readFileSync(path.join(__dirname, "db", "db.json"));
+    return JSON.parse(contents);
+}
 
 // Starts the server to begin listening
 // =============================================================
