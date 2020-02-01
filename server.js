@@ -37,6 +37,7 @@ app.post("/api/notes", function (req, res) {
     // req.body hosts is equal to the JSON post sent from the user
     // This works because of our body parsing middleware
     let newNote = req.body;
+    newNote.id = Date.now();
     console.log(newNote);
     let jsonContent = getJSONData();
     jsonContent.push(newNote);
@@ -49,9 +50,11 @@ app.delete("/api/notes/:id",
     function (req, res) {
         console.log("Deleting id:" + req.params.id);
         let jsonContent = getJSONData();
+        //Remove the record with the matching id 
         let updatedJSON = jsonContent.filter(function (definition) {
-            return definition.id.toLowerCase() !== req.params.id.toLowerCase();
+            return definition.id != req.params.id;
         });
+        //Save the updated JSON back to the file
         fs.writeFileSync(path.join(__dirname, "db", "db.json"), JSON.stringify(updatedJSON));
         res.json(updatedJSON); //sending the updated response back to client app.
     });
